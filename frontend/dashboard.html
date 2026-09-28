@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Job Application Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>Job Application Tracker</h1>
+        <button id="logoutButton">Logout</button>
+    </header>
+
+    <main class="container">
+    <h2>Dashboard</h2>
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>Total Applications</h3>
+            <p id="total">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Applied</h3>
+            <p id="applied">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Interview</h3>
+            <p id="interview">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Rejected</h3>
+            <p id="rejected">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Offers</h3>
+            <p id="offer">0</p>
+        </div>
+
+    </div>
+
+    <h2>My Applications</h2>
+
+    <section class="form-card">
+    <h2>Add Application</h2>
+
+    <form id="applicationForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="company">Company</label>
+                <input type="text"
+                id="company"
+                placeholder="Company"
+                required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="job_title">Job Title</label>
+                <input type="text"
+                id="job_title"
+                placeholder="Job Title"
+                required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text"
+                id="location"
+                placeholder="Location"
+                required
+                >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" required>
+                <option value="">Select Status</option>
+                <option value="applied">Applied</option>
+                <option value="interview">Interview</option>
+                <option value="rejected">Rejected</option>
+                <option value="offer">Offer</option>
+            </select>
+        </div>
+
+        <button type="submit" class="primary-btn">+ Add Application</button>
+    </form>
+
+    <p id="applicationMessage"></p>
+
+    </section>
+
+    <h2>Edit Application</h2>
+
+    <form id="editApplicationForm" style="display: none;">
+
+        <input type="hidden" id="edit_id">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="edit_company">Company</label>
+                <input
+                    type="text"
+                    id="edit_company"
+                    placeholder="Company"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="edit_job_title">Job Title</label>
+                <input
+                    type="text"
+                    id="edit_job_title"
+                    placeholder="Job Title"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="edit_location">Location</label>
+                <input
+                    type="text"
+                    id="edit_location"
+                    placeholder="Location"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="edit_status">Status</label>
+                <select id="edit_status" required>
+                    <option value="Applied">Applied</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Offer">Offer</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button type="submit" class="primary-btn">
+            Save Changes
+        </button>
+
+        <button type="button" id="cancelEdit" class="clear-btn">
+            Cancel
+        </button>
+
+    </form>
+    <section class="search-card">
+        <h2>Search Applications</h2>
+
+        <div class="search-controls">
+
+            <input type="text"
+            id="searchInput"
+            placeholder="Search company or job title"
+            >
+
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="applied">Applied</option>
+                <option value="interview">Interview</option>
+                <option value="rejected">Rejected</option>
+                <option value="offer">Offer</option>
+            </select>
+
+            <button id="searchButton" class="primary-btn">Search</button>
+            <button id="clearSearch" class="clear-btn">Clear</button>
+
+        </div>
+
+    </section>
+
+    <div id="applications"></div>
+
+    </main>
+
+    <script>
+        const token = localStorage.getItem("access_token");
+
+        if(!token){
+            window.location.href = "login.html";
+        }
+
+        async function loadStats() {
+            const response = await fetch(
+                "http://127.0.0.1:8000/dashboard/stats",
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+
+            if(response.ok){
+                const data = await response.json();
+
+                document.getElementById("total").textContent = data.total;
+                document.getElementById("applied").textContent = data.applied;
+                document.getElementById("interview").textContent = data.interview;
+                document.getElementById("rejected").textContent = data.rejected;
+                document.getElementById("offer").textContent = data.offer;
+            }
+            else{
+                localStorage.removeItem("access_token");
+                window.location.href = "login.html";
+            }
+        }
+
+        async function loadApplications(search="", status="") {
+            let url = "http://127.0.0.1:8000/applications";
+
+            const params = new URLSearchParams();
+            if(search){
+                params.append("search", search);
+            }
+            if(status){
+                params.append("status", status);
+            }
+            if(params.toString()){
+                url += "?" + params.toString();
+            }
+
+            const response = await fetch(
+                url,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+
+            if(response.ok){
+                const applications = await response.json();
+
+                const container = document.getElementById("applications");
+
+                container.innerHTML = "";
+
+                applications.forEach(application => {
+                    const applicationElement = document.createElement("div");
+
+                    applicationElement.innerHTML = `
+                    <div class="application-card">
+
+                            <div class="application-info">
+                                <h3>${application.company}</h3>
+                                <p class="job-title">${application.job_title}</p>
+                                <p class="location">${application.location}</p>
+                            </div>
+
+                            <div class="application-right">
+                                <span class="status-badge status-${application.status.toLowerCase()}">
+                                    ${application.status}
+                                </span>
+
+                                <div class="application-actions">
+                                    <button
+                                        class="edit-btn"
+                                        onclick="editApplication(${application.id})"
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        class="delete-btn"
+                                        onclick="deleteApplication(${application.id})"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+
+                    container.appendChild(applicationElement);
+                });
+            }
+        }
+
+        const applicationForm = document.getElementById("applicationForm");
+
+        applicationForm.addEventListener("submit", async function(event){
+            event.preventDefault();
+            const company = document.getElementById("company").value;
+            const job_title = document.getElementById("job_title").value;
+            const location = document.getElementById("location").value;
+            const status = document.getElementById("status").value;
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/applications",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        company: company,
+                        job_title: job_title,
+                        location: location,
+                        status: status
+                    })
+                }
+            );
+            const data = await response.json();
+            if(response.ok){
+                document.getElementById("applicationMessage").textContent = "Application added successfully";
+
+                applicationForm.reset();
+
+                loadApplications();
+                loadStats();
+            }
+            else{
+                document.getElementById("applicationMessage").textContent = data.detail;
+            }
+        });
+
+        async function deleteApplication(applicationId) {
+            const confirmed = confirm(
+                "Are you sure you want to delete this application?"
+            );
+
+            if(!confirmed){
+                return;
+            }
+            
+            const response = await fetch(
+                `http://127.0.0.1:8000/applications/${applicationId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+            const data = await response.json();
+
+            if(response.ok){
+                alert("Application deleted successfully");
+
+                loadApplications();
+                loadStats();
+            }
+            else{
+                alert(data.detail);
+            }
+        }
+
+        async function editApplication(applicationId) {
+            const response = await fetch(
+                `http://127.0.0.1:8000/applications/${applicationId}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+
+            if(!response.ok){
+                alert("Unable to load application");
+                return
+            }
+
+            const application = await response.json();
+
+            document.getElementById("edit_id").value = application.id;
+            document.getElementById("edit_company").value = application.company;
+            document.getElementById("edit_job_title").value = application.job_title;
+            document.getElementById("edit_location").value = application.location;
+            document.getElementById("edit_status").value = application.status;
+
+            document.getElementById("editApplicationForm").style.display = "block";
+        }
+
+        const editApplicationForm = document.getElementById("editApplicationForm");
+        editApplicationForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const applicationId = document.getElementById("edit_id").value;
+
+            const company = document.getElementById("edit_company").value;
+            const job_title = document.getElementById("edit_job_title").value;
+            const location = document.getElementById("edit_location").value;
+            const status = document.getElementById("edit_status").value;
+
+            const response = await fetch(
+                `http://127.0.0.1:8000/applications/${applicationId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        company: company,
+                        job_title: job_title,
+                        location: location,
+                        status: status
+                    })
+                }
+            );
+
+            const data = await response.json();
+            if(response.ok){
+                alert("Application updated successfully");
+                editApplicationForm.reset();
+                editApplicationForm.style.display = "none";
+
+                loadApplications();
+                loadStats();
+            }
+            else{
+                alert(data.detail);
+            }
+        });
+
+        document.getElementById("cancelEdit").addEventListener("click", function() {
+            editApplicationForm.reset();
+            editApplicationForm.style.display = "none";
+        });
+
+        document.getElementById("searchButton").addEventListener("click", function() {
+            const search = document.getElementById("searchInput").value;
+            const status = document.getElementById("statusFilter").value;
+
+            loadApplications(search, status);
+        });
+
+        document.getElementById("clearSearch").addEventListener("click", function() {
+            document.getElementById("searchInput").value = "";
+            document.getElementById("statusFilter").value = "";
+
+            loadApplications();
+        });
+
+
+        document.getElementById("logoutButton").addEventListener("click", function(){
+            localStorage.removeItem("access_token");
+            window.location.href = "login.html"
+        });
+
+        loadStats();
+        loadApplications();
+    </script>
+</body>
+</html>
