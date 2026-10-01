@@ -185,6 +185,7 @@
     </main>
 
     <script>
+        const API_URL = "http://127.0.0.1:8000";
         const token = localStorage.getItem("access_token");
 
         if(!token){
@@ -193,7 +194,7 @@
 
         async function loadStats() {
             const response = await fetch(
-                "http://127.0.0.1:8000/dashboard/stats",
+                `${API_URL}/dashboard/stats`,
                 {
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -217,7 +218,7 @@
         }
 
         async function loadApplications(search="", status="") {
-            let url = "http://127.0.0.1:8000/applications";
+            let url = `${API_URL}/applications`;
 
             const params = new URLSearchParams();
             if(search){
@@ -298,7 +299,7 @@
             const status = document.getElementById("status").value;
 
             const response = await fetch(
-                "http://127.0.0.1:8000/applications",
+                `${API_URL}/applications`,
                 {
                     method: "POST",
                     headers: {
@@ -337,7 +338,7 @@
             }
             
             const response = await fetch(
-                `http://127.0.0.1:8000/applications/${applicationId}`,
+                `${API_URL}/applications/${applicationId}`,
                 {
                     method: "DELETE",
                     headers: {
@@ -360,7 +361,7 @@
 
         async function editApplication(applicationId) {
             const response = await fetch(
-                `http://127.0.0.1:8000/applications/${applicationId}`,
+                `${API_URL}/applications/${applicationId}`,
                 {
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -395,7 +396,7 @@
             const status = document.getElementById("edit_status").value;
 
             const response = await fetch(
-                `http://127.0.0.1:8000/applications/${applicationId}`,
+                `${API_URL}/applications/${applicationId}`,
                 {
                     method: "PUT",
                     headers: {

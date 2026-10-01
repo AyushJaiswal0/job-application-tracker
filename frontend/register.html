@@ -66,6 +66,7 @@
     </div>
 
     <script>
+        const API_URL = "http://127.0.0.1:8000";
         const registerForm = document.getElementById("registerForm");
 
         registerForm.addEventListener("submit", async function(event) {
@@ -76,7 +77,7 @@
             const password = document.getElementById("password").value;
 
             const response = await fetch(
-                "http://127.0.0.1:8000/register",
+                `${API_URL}/register`,
                 {
                     method: "POST",
                     headers: {
