@@ -4,6 +4,12 @@ A full-stack web application for managing and tracking job applications.
 
 The application provides user authentication, application management, search and filtering, and a dashboard with application statistics.
 
+## Live Demo
+
+- **Frontend:** https://job-application-tracker-frontend-tau.vercel.app
+- **Backend API:** https://job-application-tracker-api-aabd.onrender.com
+- **API Documentation:** https://job-application-tracker-api-aabd.onrender.com/docs
+
 ## Features
 
 - User registration and login
@@ -333,8 +339,7 @@ The project includes several basic security practices:
 
 Possible future improvements include:
 
-- PostgreSQL database for production
-- Cloud deployment
+- PostgreSQL database for persistent production storage
 - Application deadlines
 - Notes and job descriptions
 - Resume tracking
@@ -348,8 +353,19 @@ Possible future improvements include:
 
 ## Project Status
 
-The core application is complete and functional.
+The application is fully functional and deployed.
 
-Current functionality includes authentication, CRUD operations, search and filtering, dashboard statistics, and a responsive frontend.
+Current functionality includes:
 
-The project is ready for deployment and further production-oriented improvements.
+- User registration and login
+- JWT authentication
+- Password hashing
+- User-specific application management
+- CRUD operations
+- Search and filtering
+- Dashboard statistics
+- Responsive frontend
+- REST API
+- Cloud deployment
+
+The frontend is deployed on Vercel and the FastAPI backend is deployed on Render.
